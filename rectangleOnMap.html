@@ -23,26 +23,69 @@
 
       function initMap() {
         var map = new google.maps.Map(document.getElementById('map'), {
-          zoom: 11,
-          center: {lat: 33.678, lng: -116.243},
-          mapTypeId: 'terrain'
+          center: new google.maps.LatLng(-33.863276, 151.207977),
+          zoom: 12
         });
 
-        var rectangle = new google.maps.Rectangle({
-          strokeColor: '#FF0000',
-          strokeOpacity: 0.8,
-          strokeWeight: 2,
-          fillColor: '#FF0000',
-          fillOpacity: 0.35,
-          map: map,
-          bounds: {
-            north: 33.685,
-            south: 33.671,
-            east: -116.234,
-            west: -116.251
-          }
-        });
+
+
+        loadDataFile('data.xml', function(data){
+          var xml = data.responseXML;
+          var markers = xml.documentElement.getElementsByTagName('marker');
+          Array.prototype.forEach.call(markers, function(elem) {
+
+            var id = elem.getAttribute('id');
+            var name = elem.getAttribute('name');
+            var address = elem.getAttribute('address');
+            var type = elem.getAttribute('type');
+            var point = new google.maps.LatLng(
+                parseFloat(elem.getAttribute('lat')),
+                parseFloat(elem.getAttribute('lng'))
+            );
+            console.log(point.lat() + "hehe" + point.lng());
+
+            var color = elem.getAttribute('color');
+
+            var rectangle = new google.maps.Rectangle({
+              strokeColor: '#FF0000',
+              strokeOpacity: 0.8,
+              strokeWeight: 2,
+              fillColor: color,
+              fillOpacity: 0.35,
+              map: map,
+              bounds: {
+                north: point.lat(),
+                south: point.lat() + 0.001,
+                east: point.lng(),
+                west: point.lng() - 0.001
+              }
+            });
+            console.log(rectangle.getBounds());
+          });
+        })
+
+
       }
+
+
+      function loadDataFile(url, callback) {
+        var request = new XMLHttpRequest;
+        request.onreadystatechange = function() {
+          if(request.readyState == 4) {
+            request.onreadystatechange = doNothing;
+            callback(request, request.status);
+          }
+        }
+
+        request.open('GET', url, true);
+        request.send(null);
+      }
+
+
+      function doNothing() {
+
+      }
+
     </script>
   </head>
   <body>
